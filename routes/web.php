@@ -11,28 +11,6 @@
 |
 */
 
-Route::get('/', function () {
-    $session = new SpotifyWebAPI\Session(
-        env('SPOTIFY_CLIENT_ID'),
-        env('SPOTIFY_CLIENT_SECRET'),
-        url('/')
-    );
+Route::get('/', 'SpotifyController@index');
 
-    $api = new SpotifyWebAPI\SpotifyWebAPI();
-
-    if (isset($_GET['code'])) {
-        $session->requestAccessToken($_GET['code']);
-        $api->setAccessToken($session->getAccessToken());
-
-        ddd($api->getMyRecentTracks(['limit' => 50]));
-    } else {
-        $options = [
-            'scope' => [
-                'user-read-recently-played',
-            ],
-        ];
-
-        header('Location: ' . $session->getAuthorizeUrl($options));
-        die();
-    }
-});
+Route::get('/callback', 'SpotifyController@callback');

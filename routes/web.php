@@ -12,5 +12,27 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    $session = new SpotifyWebAPI\Session(
+        env('SPOTIFY_CLIENT_ID'),
+        env('SPOTIFY_CLIENT_SECRET'),
+        url('/')
+    );
+
+    $api = new SpotifyWebAPI\SpotifyWebAPI();
+
+    if (isset($_GET['code'])) {
+        $session->requestAccessToken($_GET['code']);
+        $api->setAccessToken($session->getAccessToken());
+
+        print_r($api->me());
+    } else {
+        $options = [
+            'scope' => [
+                'user-read-email',
+            ],
+        ];
+
+        header('Location: ' . $session->getAuthorizeUrl($options));
+        die();
+    }
 });

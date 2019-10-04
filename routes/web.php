@@ -24,11 +24,11 @@ Route::get('/', function () {
         $session->requestAccessToken($_GET['code']);
         $api->setAccessToken($session->getAccessToken());
 
-        print_r($api->me());
+        ddd($api->getMyRecentTracks(['limit' => 50]));
     } else {
         $options = [
             'scope' => [
-                'user-read-email',
+                'user-read-recently-played',
             ],
         ];
 

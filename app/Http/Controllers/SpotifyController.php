@@ -73,7 +73,7 @@ class SpotifyController extends Controller
                 'artists' => array_map(function ($ar) {
                     return $ar->id;
                 }, $ar->track->artists),
-                'playedAt' => date('H', strtotime($ar->played_at))
+                'playedAt' => date('G', strtotime($ar->played_at))
             ];
         }, $recentTracks->items);
 
@@ -85,9 +85,34 @@ class SpotifyController extends Controller
             $trackArtists['genres'] = array_unique(array_merge(...$trackArtists['genres']));
         }
 
-        ddd($tracksWithArtists);
+        $playedHours = array_unique(array_map(function ($ar) {
+            return $ar['playedAt'];
+        }, $tracksWithArtists));
 
-        return view('charts', ['recentGenres' => $tracksWithArtists]);
+        asort($playedHours);
+
+        $existingGenres = array_unique(array_merge(...array_map(function ($ar) {
+            return $ar['genres'];
+        }, $tracksWithArtists)));
+
+        $result = [];
+
+        foreach($existingGenres as $genre){
+            $result[$genre] = [];
+
+            for($i=0; $i<24; $i++){
+                $result[$genre][$i] = 0;
+            }
+        }
+
+        foreach($tracksWithArtists as $tracks){
+            $playedAt = $tracks['playedAt'];
+            foreach($tracks['genres'] as $genre){
+                $result[$genre][$playedAt]++;
+            }
+        }
+
+        return view('charts', ['recentGenres' => $result]);
     }
 
     protected function addApiAccessToken()

@@ -39,6 +39,9 @@ class SpotifyController extends Controller
         $this->session->requestAccessToken($_GET['code']);
         $this->api->setAccessToken($this->session->getAccessToken());
 
-        ddd($this->api->getMyRecentTracks(['limit' => 50]));
+        $recentTracks = $this->api->getMyRecentTracks(['limit' => 10]);
+        ddd($recentTracks->items);
+
+        return view('charts', ['recentTracks' => $recentTracks->items]);
     }
 }

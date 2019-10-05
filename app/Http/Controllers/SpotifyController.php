@@ -63,7 +63,7 @@ class SpotifyController extends Controller
     public function statistics()
     {
         $this->addApiAccessToken();
-        $recentTracks = $this->api->getMyRecentTracks(['limit' => 10]);
+        $recentTracks = $this->api->getMyRecentTracks(['limit' => 50]);
 
         return view('charts', ['recentTracks' => $recentTracks->items]);
     }

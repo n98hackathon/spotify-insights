@@ -5,7 +5,7 @@ namespace App\Service;
 
 class BeforeTimestampBunchService
 {
-    const BUNCH_SIZE = 1;
+    const BUNCH_SIZE = 10;
 
     /**
      * @param $callback
@@ -14,13 +14,14 @@ class BeforeTimestampBunchService
      * @param array $params
      * @return array
      */
-    public static function execute($callback, $count = self::BUNCH_SIZE, $beforeTimestamp = null, $params = []) : array
+    public static function execute($callback, $count = self::BUNCH_SIZE, $beforeTimestamp = null, $params = []): array
     {
         $beforeTimestamp = $beforeTimestamp ?? now();
         $result = [];
         $dataToLoad = $count;
 
         do {
+            echo $dataToLoad . "\n";
             $limit = ($dataToLoad > self::BUNCH_SIZE) ? self::BUNCH_SIZE : $dataToLoad;
 
             $params = array_merge(
@@ -33,10 +34,16 @@ class BeforeTimestampBunchService
 
             $bunchResult = $callback($params);
             $items = $bunchResult->items;
-            $beforeTimestamp = $bunchResult->cursors->before;
 
             $result = array_merge($result, $items);
             $dataToLoad -= count($items);
+
+            if (count($items) !== $limit) {
+                ddd($bunchResult);
+            }
+
+            $beforeTimestamp = $bunchResult->cursors->before;
+
         } while ($dataToLoad > 0);
 
         return $result;

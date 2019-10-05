@@ -1,5 +1,5 @@
 <div class="title m-b-md">
-    Length of recently played Tracks
+    Genres of recently played Tracks
 </div>
 <canvas id="recent-tracks"></canvas>
 <script>

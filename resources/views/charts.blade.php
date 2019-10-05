@@ -9,6 +9,7 @@
 
         <div class="content">
             @include('charts.genres')
+            @include('charts.bpm')
         </div>
     </div>
 @endsection

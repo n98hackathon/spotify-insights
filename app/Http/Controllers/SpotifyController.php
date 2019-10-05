@@ -64,6 +64,63 @@ class SpotifyController extends Controller
 
     public function statistics()
     {
+        $bpm = $this->getBpmByTime();
+        $genre = $this->getGenresByTime();
+        return view('charts', ['recentGenres' => $genre, 'recentBpm' => $bpm]);
+    }
+
+    protected function getBpmByTime()
+    {
+        $this->addApiAccessToken();
+        $recentTracks = $this->api->getMyRecentTracks(['limit' => 50]);
+
+        $tracks = array_map(function ($ar) {
+            return [
+                'id' => $ar->track->id,
+                'playedAt' => date('G', strtotime($ar->played_at))
+            ];
+        }, $recentTracks->items);
+
+        $ids = array_map(function ($ar) {
+            return $ar['id'];
+        }, $tracks);
+
+        $features = $this->api->getAudioFeatures($ids);
+
+        foreach($features->audio_features as $feature){
+            foreach($tracks as &$track){
+                if($track['id'] === $feature->id){
+                    $track['bpm'] = $feature->tempo;
+                }
+            }
+        }
+
+        $result = [];
+
+        for($i=0; $i<24; $i++){
+            $result[$i] = [];
+        }
+
+        foreach($tracks as $track){
+            $result[$track['playedAt']][] = $track['bpm'];
+        }
+
+        foreach($result as &$resultItem){
+            $count = \count($resultItem);
+            if($count){
+                $resultItem['avg'] = array_sum($resultItem)/$count;
+                continue;
+            }
+
+            $resultItem['avg'] = 0;
+        }
+
+        return $result;
+    }
+
+
+    protected function getGenresByTime()
+    {
         $this->addApiAccessToken();
         $recentTracks = $this->api->getMyRecentTracks(['limit' => 50]);
 
@@ -112,12 +169,9 @@ class SpotifyController extends Controller
             }
         }
 
-        //ddd($result);
-
-        return view('charts', ['recentGenres' => $result]);
+        return $result;
     }
-
-    protected function addApiAccessToken()
+        protected function addApiAccessToken()
     {
         $accessToken = Session::get('access-token');
         $this->api->setAccessToken($accessToken);

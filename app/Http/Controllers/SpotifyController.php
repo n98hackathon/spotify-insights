@@ -13,6 +13,7 @@ class SpotifyController extends Controller
 {
     /** @var SpotifySession */
     protected $session;
+
     /** @var SpotifyWebAPI\SpotifyWebAPI */
     protected $api;
 
@@ -43,6 +44,7 @@ class SpotifyController extends Controller
 
     /**
      * @param Request $request
+     *
      * @return ViewFactory|View
      */
     public function callback()
@@ -63,7 +65,36 @@ class SpotifyController extends Controller
     public function statistics()
     {
         $this->addApiAccessToken();
-        $recentTracks = $this->api->getMyRecentTracks(['limit' => 50]);
+        $recentTracks = $this->api->getMyRecentTracks(['limit' => 20]);
+
+        //Get Artist Array of all tracks
+        $trackArtists = array_map(function ($ar) {
+            return [
+                'artists' => array_map(function ($ar) {
+                    return $ar->id;
+                }, $ar->track->artists),
+                'playedAt' => $ar->played_at
+            ];
+        }, $recentTracks->items);
+
+        ddd($trackArtists);
+        //Merge to single artist array
+        $trackArtists = array_merge(...$trackArtists);
+
+        ddd($trackArtists);
+        //Map to Artist Ids
+        $artistIds = array_map(function ($ar) {
+            return id;
+        }, $trackArtists);
+
+        $artists = $this->api->getArtists($artistIds);
+        $artists = $artists->artists;
+
+        $genres = array_map(function ($ar) {
+            return $ar->genres;
+        }, $artists);
+        $genres = array_merge(...$genres);
+        ddd($genres);
 
         return view('charts', ['recentTracks' => $recentTracks->items]);
     }

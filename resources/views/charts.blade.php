@@ -93,7 +93,7 @@
                                 // borderColor: 'rgb(255, 99, 132)',
                                 data: [
                                     @foreach($recentTracks as $recentTrack)
-                                        '{{ $recentTrack->track->popularity }}',
+                                        '{{ $recentTrack->track->duration_ms/1000 }}',
                                     @endforeach
                                     ]
                             }]

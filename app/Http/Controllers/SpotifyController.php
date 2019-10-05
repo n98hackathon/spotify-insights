@@ -49,7 +49,7 @@ class SpotifyController extends Controller
      */
     public function callback()
     {
-        if (!Session::has('access-token')) {
+        if (!Session::has('access-token') || $this->session->getTokenExpiration() === 0) {
             $this->session->requestAccessToken($_GET['code']);
             $accessToken = $this->session->getAccessToken();
             Session::put('access-token', $accessToken);
@@ -65,38 +65,29 @@ class SpotifyController extends Controller
     public function statistics()
     {
         $this->addApiAccessToken();
-        $recentTracks = $this->api->getMyRecentTracks(['limit' => 20]);
+        $recentTracks = $this->api->getMyRecentTracks(['limit' => 50]);
 
         //Get Artist Array of all tracks
-        $trackArtists = array_map(function ($ar) {
+        $tracksWithArtists = array_map(function ($ar) {
             return [
                 'artists' => array_map(function ($ar) {
                     return $ar->id;
                 }, $ar->track->artists),
-                'playedAt' => $ar->played_at
+                'playedAt' => date('H', strtotime($ar->played_at))
             ];
         }, $recentTracks->items);
 
-        ddd($trackArtists);
-        //Merge to single artist array
-        $trackArtists = array_merge(...$trackArtists);
+        foreach ($tracksWithArtists as &$trackArtists) {
+            $artists = $this->api->getArtists($trackArtists['artists']);
+            $trackArtists['genres'] = array_map(function ($ar) {
+                return $ar->genres;
+            }, $artists->artists);
+            $trackArtists['genres'] = array_unique(array_merge(...$trackArtists['genres']));
+        }
 
-        ddd($trackArtists);
-        //Map to Artist Ids
-        $artistIds = array_map(function ($ar) {
-            return id;
-        }, $trackArtists);
+        ddd($tracksWithArtists);
 
-        $artists = $this->api->getArtists($artistIds);
-        $artists = $artists->artists;
-
-        $genres = array_map(function ($ar) {
-            return $ar->genres;
-        }, $artists);
-        $genres = array_merge(...$genres);
-        ddd($genres);
-
-        return view('charts', ['recentTracks' => $recentTracks->items]);
+        return view('charts', ['recentGenres' => $tracksWithArtists]);
     }
 
     protected function addApiAccessToken()

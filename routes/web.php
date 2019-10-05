@@ -14,3 +14,4 @@
 Route::get('/', 'SpotifyController@index');
 
 Route::get('/callback', 'SpotifyController@callback');
+Route::get('/statistics', 'SpotifyController@statistics');

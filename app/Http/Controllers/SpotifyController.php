@@ -4,20 +4,21 @@ namespace App\Http\Controllers;
 
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 use Illuminate\View\View;
 use SpotifyWebAPI;
-use SpotifyWebAPI\Session;
+use SpotifyWebAPI\Session as SpotifySession;
 
 class SpotifyController extends Controller
 {
-    /** @var Session */
+    /** @var SpotifySession */
     protected $session;
     /** @var SpotifyWebAPI\SpotifyWebAPI */
     protected $api;
 
     public function __construct()
     {
-        $this->session = new Session(
+        $this->session = new SpotifySession(
             env('SPOTIFY_CLIENT_ID'),
             env('SPOTIFY_CLIENT_SECRET'),
             url('/callback')
@@ -44,19 +45,32 @@ class SpotifyController extends Controller
      * @param Request $request
      * @return ViewFactory|View
      */
-    public function callback(Request $request)
+    public function callback()
     {
-        if (!$request->session()->has('access-token')) {
+        if (!Session::has('access-token')) {
             $this->session->requestAccessToken($_GET['code']);
             $accessToken = $this->session->getAccessToken();
-            $request->session()->put('access-token', $accessToken);
+            Session::put('access-token', $accessToken);
         } else {
-            $accessToken = $request->session()->get('access-token');
+            $accessToken = Session::get('access-token');
         }
 
         $this->api->setAccessToken($accessToken);
+
+        return redirect('/statistics');
+    }
+
+    public function statistics()
+    {
+        $this->addApiAccessToken();
         $recentTracks = $this->api->getMyRecentTracks(['limit' => 10]);
 
         return view('charts', ['recentTracks' => $recentTracks->items]);
+    }
+
+    protected function addApiAccessToken()
+    {
+        $accessToken = Session::get('access-token');
+        $this->api->setAccessToken($accessToken);
     }
 }

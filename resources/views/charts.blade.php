@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-<div class="flex-center position-ref full-height">
+<div class="position-ref full-height">
 
         <div class="content">
             @include('charts.recent-tracks')

@@ -47,15 +47,9 @@ class SpotifyController extends Controller
      */
     public function callback()
     {
-        if (!Session::has('access-token')) {
-            $this->session->requestAccessToken($_GET['code']);
-            $accessToken = $this->session->getAccessToken();
-            Session::put('access-token', $accessToken);
-        } else {
-            $accessToken = Session::get('access-token');
-        }
-
-        $this->api->setAccessToken($accessToken);
+        $this->session->requestAccessToken($_GET['code']);
+        $accessToken = $this->session->getAccessToken();
+        Session::put('access-token', $accessToken);
 
         return redirect('/statistics');
     }

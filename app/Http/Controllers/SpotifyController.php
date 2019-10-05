@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Contracts\View\Factory as ViewFactory;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
 use SpotifyWebAPI;
 use SpotifyWebAPI\Session;
 
@@ -23,6 +26,9 @@ class SpotifyController extends Controller
         $this->api = new SpotifyWebAPI\SpotifyWebAPI();
     }
 
+    /**
+     * @return ViewFactory|View
+     */
     public function index()
     {
         $options = [
@@ -34,13 +40,22 @@ class SpotifyController extends Controller
         return view('welcome', ['url' => $this->session->getAuthorizeUrl($options)]);
     }
 
-    public function callback()
+    /**
+     * @param Request $request
+     * @return ViewFactory|View
+     */
+    public function callback(Request $request)
     {
-        $this->session->requestAccessToken($_GET['code']);
-        $this->api->setAccessToken($this->session->getAccessToken());
+        if (!$request->session()->has('access-token')) {
+            $this->session->requestAccessToken($_GET['code']);
+            $accessToken = $this->session->getAccessToken();
+            $request->session()->put('access-token', $accessToken);
+        } else {
+            $accessToken = $request->session()->get('access-token');
+        }
 
+        $this->api->setAccessToken($accessToken);
         $recentTracks = $this->api->getMyRecentTracks(['limit' => 10]);
-        ddd($recentTracks->items);
 
         return view('charts', ['recentTracks' => $recentTracks->items]);
     }

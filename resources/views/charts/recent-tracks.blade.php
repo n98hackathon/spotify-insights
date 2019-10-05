@@ -9,14 +9,14 @@
         data: {
             labels: [
                 @foreach($recentTracks as $index => $recentTrack)
-                    '{{ $recentTrack->track->name }}',
+                    "{!! $recentTrack->track->name !!}",
                 @endforeach
             ],
             datasets: [{
                 label: 'Recent Tracks',
                 backgroundColor: [
                     @foreach($recentTracks as $recentTrack)
-                        'rgb({{ rand(0, 255) }}, {{ rand(0, 255) }}, {{ rand(0, 255) }})',
+                        'rgb(0,{{ $recentTrack->track->popularity * (255/100) }},0)',
                     @endforeach
                 ],
                 // borderColor: 'rgb(255, 99, 132)',

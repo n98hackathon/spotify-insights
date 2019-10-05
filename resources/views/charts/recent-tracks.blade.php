@@ -9,7 +9,7 @@
         data: {
             labels: [
                 @foreach($recentTracks as $index => $recentTrack)
-                    '{{ $recentTrack->track->name }}',
+                    "{!! $recentTrack->track->name !!}",
                 @endforeach
             ],
             datasets: [{

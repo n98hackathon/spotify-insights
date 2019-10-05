@@ -8,7 +8,7 @@
 <div class="position-ref full-height">
 
         <div class="content">
-            @include('charts.recent-tracks')
+            @include('charts.genres')
         </div>
     </div>
 @endsection

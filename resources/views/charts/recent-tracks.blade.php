@@ -13,7 +13,7 @@
                 @endforeach
             ],
             datasets: [{
-                label: 'My First dataset',
+                label: 'Recent Tracks',
                 backgroundColor: [
                     @foreach($recentTracks as $recentTrack)
                         'rgb({{ rand(0, 255) }}, {{ rand(0, 255) }}, {{ rand(0, 255) }})',
